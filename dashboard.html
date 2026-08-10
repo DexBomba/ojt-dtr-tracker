@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OJT DTR · Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+    <!-- ====== NAVBAR ====== -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand">
+                <i class="fas fa-pencil-alt"></i>
+                OJT DTR
+            </a>
+            <div class="nav-right">
+                <div class="nav-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userEmail">johndexterobut@gmail.com</span>
+                </div>
+                <a href="index.html" class="btn btn-ghost btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ====== DASHBOARD ====== -->
+    <main class="dashboard">
+        <div class="container">
+
+            <!-- Stats Row -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="label">Total Hours Completed</div>
+                    <div class="value" id="totalHours">16.0</div>
+                    <div class="sub">hours logged</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Target OJT Hours</div>
+                    <div class="value" id="targetHours">500</div>
+                    <div class="sub">required hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Hours Remaining</div>
+                    <div class="value" id="remainingHours">484.0</div>
+                    <div class="sub">hours to go</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">OJT Progress</div>
+                    <div class="value" id="progressPercent">3.2%</div>
+                    <div class="progress-bar">
+                        <div class="fill" id="progressFill" style="width:3.2%;"></div>
+                    </div>
+                    <div class="progress-text" id="progressLabel">3.2%</div>
+                </div>
+            </div>
+
+            <!-- Hour Settings -->
+            <div class="card" style="margin-bottom: 30px;">
+                <h3><i class="fas fa-clock"></i> Hour Settings</h3>
+                <div class="hour-settings">
+                    <label for="targetInput">Target OJT Hours:</label>
+                    <input type="number" id="targetInput" value="500" min="1" step="10" />
+                    <button class="btn btn-primary btn-sm" id="updateTargetBtn">Update Target</button>
+                </div>
+            </div>
+
+            <!-- Main Grid: Log Shift + Quick Stats -->
+            <div class="dashboard-grid">
+                <!-- Left: Log Shift -->
+                <div class="card">
+                    <h3><i class="fas fa-plus-circle"></i> Log OJT Shift</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 18px; font-size: 0.9rem;">Enter your completed shift details</p>
+
+                    <form class="shift-form" id="shiftForm">
+                        <!-- Date -->
+                        <div class="form-group">
+                            <label for="shiftDate">Date</label>
+                            <input type="date" id="shiftDate" required />
+                        </div>
+
+                        <!-- Morning Session -->
+                        <div class="session-group">
+                            <h4>🌅 Morning Session</h4>
+                            <div class="time-row">
+                                <div class="form-group">
+                                    <label for="morningIn">Clock In</label>
+                                    <input type="time" id="morningIn" value="08:00" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="morningOut">Clock Out</label>
+                                    <input type="time" id="morningOut" value="12:00" />
+                                </div>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                                Duration: <span id="morningDuration">4.00</span> hrs
+                            </div>
+                        </div>
+
+                        <!-- Afternoon Session -->
+                        <div class="session-group">
+                            <h4>☀️ Afternoon Session</h4>
+                            <div class="time-row">
+                                <div class="form-group">
+                                    <label for="afternoonIn">Clock In</label>
+                                    <input type="time" id="afternoonIn" value="13:00" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="afternoonOut">Clock Out</label>
+                                    <input type="time" id="afternoonOut" value="17:00" />
+                                </div>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                                Duration: <span id="afternoonDuration">4.00</span> hrs
+                            </div>
+                        </div>
+
+                        <!-- Overtime (Optional) -->
+                        <div class="session-group" style="border: 2px dashed var(--border);">
+                            <h4>🌙 Overtime <span style="font-weight:400; font-size:0.8rem; color:var(--text-muted);">(Optional)</span></h4>
+                            <div class="time-row">
+                                <div class="form-group">
+                                    <label for="otStart">Start</label>
+                                    <input type="time" id="otStart" value="18:00" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="otEnd">End</label>
+                                    <input type="time" id="otEnd" value="20:00" />
+                                </div>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                                Duration: <span id="otDuration">0.00</span> hrs
+                            </div>
+                        </div>
+                        <div class="total-duration">
+                            Total Shift Duration: <span id="totalShiftDuration">8.00</span> hours
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">
+                            <i class="fas fa-save"></i> Save Shift
+                        </button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-chart-simple"></i> Quick Statistics</h3>
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="number" id="totalShifts">2</div>
+                            <div class="label">Total Shifts Logged</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="number" id="avgHours">8.00</div>
+                            <div class="label">Average Hours/Shift</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="number" id="completionRate">3.2%</div>
+                            <div class="label">Completion Rate</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="number" id="totalDays">2</div>
+                            <div class="label">Total Days</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shift History -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3 style="font-family:var(--font-heading); font-size:1.4rem; color:var(--secondary);">
+                        <i class="fas fa-history" style="color:var(--primary);"></i> Shift History
+                    </h3>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-sm" id="printBtn"><i class="fas fa-print"></i> Save / Print DTR</button>
+                    </div>
+                </div>
+                <div class="card" style="padding: 12px 0;">
+                    <div class="table-wrapper">
+                        <table id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Morning</th>
+                                    <th>Afternoon</th>
+                                    <th>Overtime</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody">
+                                <!-- Rows inserted by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ====== MODAL ====== -->
+    <div class="modal-overlay" id="dtrModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-print" style="color:var(--primary);"></i> Save / Print DTR</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <p>Fill in your details. This will appear on your printed DTR. Your info is saved automatically.</p>
+
+            <form id="dtrForm">
+                <div class="form-group">
+                    <label>Full Name <span class="required">*</span></label>
+                    <input type="text" id="dtrFullName" placeholder="e.g. Juan Dela Cruz" required />
+                </div>
+                <div class="form-group">
+                    <label>School / University <span class="required">*</span></label>
+                    <input type="text" id="dtrSchool" placeholder="e.g. North Eastern Mindanao State University" required />
+                </div>
+                <div class="form-group">
+                    <label>Department / Course <span class="required">*</span></label>
+                    <input type="text" id="dtrDepartment" placeholder="e.g. BSIT - College of Engineering" required />
+                </div>
+                <div class="form-group">
+                    <label>Company / Organization <span class="required">*</span></label>
+                    <input type="text" id="dtrCompany" placeholder="e.g. Acme Corporation" required />
+                </div>
+                <div class="form-group">
+                    <label>Position / Role <span class="required">*</span></label>
+                    <input type="text" id="dtrPosition" placeholder="e.g. IT Intern" required />
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeSignature" checked />
+                    <label for="includeSignature">Include signature section</label>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:-8px; margin-bottom:16px;">
+                    The intern fills this in the supervisor only needs to sign the printed copy.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Supervisor / Manager Name</label>
+                        <input type="text" id="dtrSupervisor" placeholder="e.g. Maria Santos" />
+                    </div>
+                    <div class="form-group">
+                        <label>Supervisor Position / Title</label>
+                        <input type="text" id="dtrSupervisorTitle" placeholder="e.g. OJT Coordinator / IT Manager" />
+                    </div>
+                </div>
+
+                <div style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">
+                    <i class="fas fa-info-circle"></i> Your info is saved automatically.
+                </div>
+
+                <div class="export-actions">
+                    <button type="button" class="btn btn-primary" id="printPdfBtn"><i class="fas fa-print"></i> 🖨️ Print / PDF</button>
+                    <button type="button" class="btn btn-secondary" id="csvBtn"><i class="fas fa-file-csv"></i> 📊 CSV</button>
+                    <button type="button" class="btn btn-secondary" id="excelBtn"><i class="fas fa-file-excel"></i> 📗 Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="footer">
+        <div class="container">
+            <span>© 2026 OJT DTR Tracker — For Student Use</span>
+            <span>
+                <a href="#">Privacy Policy</a> &middot;
+                <a href="#">Terms of Service</a>
+            </span>
+            <span>Developed by fDexBomba</span>
+        </div>
+    </footer>
+
+    <!-- Dashboard JavaScript -->
+    <script src="dashboard.js"></script>
+</body>
+</html>
