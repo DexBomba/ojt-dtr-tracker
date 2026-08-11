@@ -1,3 +1,74 @@
+//const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://ojt-dtr-tracker-backend.onrender.com/api';
+// ---------- CUSTOM ALERT SYSTEM ----------
+function showAlert(message, type = 'info', title = '') {
+    // Remove existing alert if any
+    const existing = document.querySelector('.alert-overlay');
+    if (existing) {
+        existing.remove();
+    }
+
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+
+    const titles = {
+        success: 'Success!',
+        error: 'Error!',
+        warning: 'Warning!',
+        info: 'Notice'
+    };
+
+    const btnClasses = {
+        success: 'btn-success',
+        error: 'btn-error',
+        warning: 'btn-warning',
+        info: 'btn-info'
+    };
+
+    const overlay = document.createElement('div');
+    overlay.className = 'alert-overlay active';
+    overlay.innerHTML = `
+        <div class="alert-modal">
+            <div class="alert-icon ${type}">${icons[type] || 'ℹ️'}</div>
+            <h3>${title || titles[type] || 'Notice'}</h3>
+            <p>${message}</p>
+            <button class="btn ${btnClasses[type] || 'btn-info'}" onclick="this.closest('.alert-overlay').remove()">
+                <i class="fas fa-check"></i> OK
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Close on overlay click (outside modal)
+    overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.remove();
+        }
+    });
+
+    // Close on Escape key
+    const closeHandler = function(e) {
+        if (e.key === 'Escape') {
+            const alert = document.querySelector('.alert-overlay');
+            if (alert) {
+                alert.remove();
+                document.removeEventListener('keydown', closeHandler);
+            }
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+}
+
+// Override the default alert
+window.alert = function(message) {
+    showAlert(message, 'info');
+};
+
 (function () {
   "use strict";
   const disclaimerOverlay = document.getElementById("disclaimerOverlay");
@@ -90,47 +161,94 @@
     document.getElementById("hero").scrollIntoView({ behavior: "smooth" });
   });
 
-  loginForm.addEventListener("submit", function (e) {
+  loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value.trim();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
     if (!email || !password) {
-      alert("Please fill in all fields.");
-      return;
+        showAlert('Please fill in all fields.', 'warning');
+        return;
     }
-    alert("✅ Login successful! (demo)\nWelcome back, " + email);
-    // TODO: Redirect to dashboard when backend is ready
-    // window.location.href = 'dashboard.html';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed');
+        }
+
+        // Save token and user
+        localStorage.setItem('ojt_token', data.token);
+        localStorage.setItem('ojt_user', JSON.stringify(data.user));
+
+        showAlert('Welcome back, ' + data.user.name + '!', 'success');
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1000);
+
+    } catch (error) {
+        showAlert(error.message, 'error');
+    }
   });
 
-  registerForm.addEventListener("submit", function (e) {
+  registerForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const name = document.getElementById("regName").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const pass = document.getElementById("regPassword").value.trim();
-    const confirm = document.getElementById("regConfirm").value.trim();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const confirm = document.getElementById('regConfirm').value.trim();
 
-    if (!name || !email || !pass || !confirm) {
-      alert("Please fill in all fields.");
-      return;
+    if (!name || !email || !password || !confirm) {
+        showAlert('Please fill in all fields.', 'warning');
+        return;
     }
-    if (pass !== confirm) {
-      alert("Passwords do not match.");
-      return;
+    if (password !== confirm) {
+        showAlert('Passwords do not match.', 'warning');
+        return;
     }
-    if (pass.length < 6) {
-      alert("Password must be at least 6 characters.");
-      return;
+    if (password.length < 6) {
+        showAlert('Password must be at least 6 characters.', 'warning');
+        return;
     }
-    alert("🎉 Account created! (demo)\nWelcome, " + name + "!");
-    // TODO: Redirect to dashboard when backend is ready
-    // window.location.href = 'dashboard.html';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Registration failed');
+        }
+
+        // Save token and user
+        localStorage.setItem('ojt_token', data.token);
+        localStorage.setItem('ojt_user', JSON.stringify(data.user));
+
+        showAlert('Welcome, ' + data.user.name + '! Your account has been created.', 'success');
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1000);
+
+    } catch (error) {
+        showAlert(error.message, 'error');
+    }
   });
 
   document.querySelectorAll(".auth-social button").forEach((btn) => {
     btn.addEventListener("click", function () {
       const provider = this.textContent.trim();
-      alert("🔐 " + provider + " authentication (demo)");
+      showAlert(provider + ' authentication (demo)', 'info');
     });
   });
 

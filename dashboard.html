@@ -27,7 +27,7 @@
                     <i class="fas fa-user-circle"></i>
                     <span id="userEmail">johndexterobut@gmail.com</span>
                 </div>
-                <a href="index.html" class="btn btn-ghost btn-sm">Logout</a>
+                <a href="#" class="btn btn-ghost btn-sm" id="logoutBtn">Logout</a>
             </div>
         </div>
     </nav>
@@ -40,7 +40,7 @@
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
                     <div class="label">Total Hours Completed</div>
-                    <div class="value" id="totalHours">16.0</div>
+                    <div class="value" id="totalHours">0.0</div>
                     <div class="sub">hours logged</div>
                 </div>
                 <div class="stat-card">
@@ -50,16 +50,16 @@
                 </div>
                 <div class="stat-card">
                     <div class="label">Hours Remaining</div>
-                    <div class="value" id="remainingHours">484.0</div>
+                    <div class="value" id="remainingHours">500.0</div>
                     <div class="sub">hours to go</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">OJT Progress</div>
-                    <div class="value" id="progressPercent">3.2%</div>
+                    <div class="value" id="progressPercent">0%</div>
                     <div class="progress-bar">
-                        <div class="fill" id="progressFill" style="width:3.2%;"></div>
+                        <div class="fill" id="progressFill" style="width:0%;"></div>
                     </div>
-                    <div class="progress-text" id="progressLabel">3.2%</div>
+                    <div class="progress-text" id="progressLabel">0%</div>
                 </div>
             </div>
 
@@ -129,17 +129,18 @@
                             <div class="time-row">
                                 <div class="form-group">
                                     <label for="otStart">Start</label>
-                                    <input type="time" id="otStart" value="18:00" />
+                                    <input type="time" id="otStart" placeholder="--:--" />
                                 </div>
                                 <div class="form-group">
                                     <label for="otEnd">End</label>
-                                    <input type="time" id="otEnd" value="20:00" />
+                                    <input type="time" id="otEnd" placeholder="--:--" />
                                 </div>
                             </div>
                             <div style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
                                 Duration: <span id="otDuration">0.00</span> hrs
                             </div>
                         </div>
+
                         <div class="total-duration">
                             Total Shift Duration: <span id="totalShiftDuration">8.00</span> hours
                         </div>
@@ -149,23 +150,25 @@
                         </button>
                     </form>
                 </div>
+
+                <!-- Right: Quick Statistics -->
                 <div class="card">
                     <h3><i class="fas fa-chart-simple"></i> Quick Statistics</h3>
                     <div class="quick-stats">
                         <div class="quick-stat">
-                            <div class="number" id="totalShifts">2</div>
+                            <div class="number" id="totalShifts">0</div>
                             <div class="label">Total Shifts Logged</div>
                         </div>
                         <div class="quick-stat">
-                            <div class="number" id="avgHours">8.00</div>
+                            <div class="number" id="avgHours">0.00</div>
                             <div class="label">Average Hours/Shift</div>
                         </div>
                         <div class="quick-stat">
-                            <div class="number" id="completionRate">3.2%</div>
+                            <div class="number" id="completionRate">0%</div>
                             <div class="label">Completion Rate</div>
                         </div>
                         <div class="quick-stat">
-                            <div class="number" id="totalDays">2</div>
+                            <div class="number" id="totalDays">0</div>
                             <div class="label">Total Days</div>
                         </div>
                     </div>
@@ -222,7 +225,7 @@
                 </div>
                 <div class="form-group">
                     <label>School / University <span class="required">*</span></label>
-                    <input type="text" id="dtrSchool" placeholder="e.g. North Eastern Mindanao State University" required />
+                    <input type="text" id="dtrSchool" placeholder="e.g. University of the East" required />
                 </div>
                 <div class="form-group">
                     <label>Department / Course <span class="required">*</span></label>
@@ -242,7 +245,7 @@
                     <label for="includeSignature">Include signature section</label>
                 </div>
                 <p style="font-size:0.85rem; color:var(--text-muted); margin-top:-8px; margin-bottom:16px;">
-                    The intern fills this in the supervisor only needs to sign the printed copy.
+                    The intern fills this in — the supervisor only needs to sign the printed copy.
                 </p>
 
                 <div class="form-row">
@@ -281,7 +284,6 @@
         </div>
     </footer>
 
-    <!-- Dashboard JavaScript -->
     <script src="dashboard.js"></script>
 </body>
 </html>
