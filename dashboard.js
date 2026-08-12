@@ -42,6 +42,67 @@
 
     window.alert = function(message) { showAlert(message, 'info'); };
 
+    // ---------- CUSTOM CONFIRM ----------
+let confirmResolve = null;
+
+function showConfirm(message, title = 'Are you sure?', confirmText = 'Yes, Delete', cancelText = 'Cancel') {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('confirmModal');
+        const titleEl = document.getElementById('confirmTitle');
+        const messageEl = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmOk');
+        const cancelBtn = document.getElementById('confirmCancel');
+
+        // Set content
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        confirmBtn.textContent = confirmText;
+        cancelBtn.textContent = cancelText;
+
+        // Show modal
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Store resolve function
+        confirmResolve = resolve;
+
+        // Button handlers
+        confirmBtn.onclick = function() {
+            closeConfirm(true);
+        };
+
+        cancelBtn.onclick = function() {
+            closeConfirm(false);
+        };
+
+        // Close on Escape
+        const keyHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeConfirm(false);
+                document.removeEventListener('keydown', keyHandler);
+            }
+        };
+        document.addEventListener('keydown', keyHandler);
+
+        // Close on overlay click (outside modal)
+        overlay.onclick = function(e) {
+            if (e.target === overlay) {
+                closeConfirm(false);
+            }
+        };
+    });
+}
+
+function closeConfirm(result) {
+    const overlay = document.getElementById('confirmModal');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    if (confirmResolve) {
+        confirmResolve(result);
+        confirmResolve = null;
+    }
+}
+
     // ---------- DOM REFS ----------
     const userEmailSpan = document.getElementById('userEmail');
     const totalHoursEl = document.getElementById('totalHours');
@@ -230,13 +291,19 @@
 
         // Attach event listeners for Edit/Delete
         document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = parseInt(this.dataset.id);
-                if (confirm('Delete this shift?')) {
-                    deleteShift(id);
-                }
-            });
-        });
+    btn.addEventListener('click', async function() {
+        const id = parseInt(this.dataset.id);
+        const confirmed = await showConfirm(
+            'This shift will be permanently removed from your records.',
+            'Delete Shift?',
+            'Yes, Delete',
+            'Cancel'
+        );
+        if (confirmed) {
+            deleteShift(id);
+        }
+    });
+});
 
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', function() {
