@@ -557,14 +557,12 @@ table .actions .btn {
 }
 
 /* ---------- RESPONSIVE ---------- */
-@media (max-width: 768px) {
-    .footer .container span {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 4px 8px;
+@media (max-width: 600px) {
+    .footer-content {
+        gap: 2px 6px;
+        font-size: 0.75rem;
     }
-}
+ }
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: 1fr 1fr;
@@ -623,19 +621,28 @@ table .actions .btn {
     align-items: center;
 }
 
-.footer a {
-    color: rgba(255, 255, 255, 0.6);
-    transition: var(--transition);
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px 8px;
 }
 
-.footer a:hover {
+.footer-content a {
+    color: rgba(255, 255, 255, 0.6);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.footer-content a:hover {
     color: #fff;
 }
 
 .footer-divider {
-    margin: 0 8px;
-    opacity: 0.4;
+    color: rgba(255, 255, 255, 0.3);
 }
+
 
 /* ---------- PRINT STYLES ---------- */
 @media print {
