@@ -43,65 +43,58 @@
     window.alert = function(message) { showAlert(message, 'info'); };
 
     // ---------- CUSTOM CONFIRM ----------
-let confirmResolve = null;
+    let confirmResolve = null;
 
-function showConfirm(message, title = 'Are you sure?', confirmText = 'Yes, Delete', cancelText = 'Cancel') {
-    return new Promise((resolve) => {
-        const overlay = document.getElementById('confirmModal');
-        const titleEl = document.getElementById('confirmTitle');
-        const messageEl = document.getElementById('confirmMessage');
-        const confirmBtn = document.getElementById('confirmOk');
-        const cancelBtn = document.getElementById('confirmCancel');
+    function showConfirm(message, title = 'Are you sure?', confirmText = 'Yes, Delete', cancelText = 'Cancel') {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmOk');
+            const cancelBtn = document.getElementById('confirmCancel');
 
-        // Set content
-        titleEl.textContent = title;
-        messageEl.textContent = message;
-        confirmBtn.textContent = confirmText;
-        cancelBtn.textContent = cancelText;
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            confirmBtn.textContent = confirmText;
+            cancelBtn.textContent = cancelText;
 
-        // Show modal
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            confirmResolve = resolve;
 
-        // Store resolve function
-        confirmResolve = resolve;
+            confirmBtn.onclick = function() {
+                closeConfirm(true);
+            };
 
-        // Button handlers
-        confirmBtn.onclick = function() {
-            closeConfirm(true);
-        };
-
-        cancelBtn.onclick = function() {
-            closeConfirm(false);
-        };
-
-        // Close on Escape
-        const keyHandler = function(e) {
-            if (e.key === 'Escape') {
+            cancelBtn.onclick = function() {
                 closeConfirm(false);
-                document.removeEventListener('keydown', keyHandler);
-            }
-        };
-        document.addEventListener('keydown', keyHandler);
+            };
 
-        // Close on overlay click (outside modal)
-        overlay.onclick = function(e) {
-            if (e.target === overlay) {
-                closeConfirm(false);
-            }
-        };
-    });
-}
+            const keyHandler = function(e) {
+                if (e.key === 'Escape') {
+                    closeConfirm(false);
+                    document.removeEventListener('keydown', keyHandler);
+                }
+            };
+            document.addEventListener('keydown', keyHandler);
 
-function closeConfirm(result) {
-    const overlay = document.getElementById('confirmModal');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-    if (confirmResolve) {
-        confirmResolve(result);
-        confirmResolve = null;
+            overlay.onclick = function(e) {
+                if (e.target === overlay) {
+                    closeConfirm(false);
+                }
+            };
+        });
     }
-}
+
+    function closeConfirm(result) {
+        const overlay = document.getElementById('confirmModal');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        if (confirmResolve) {
+            confirmResolve(result);
+            confirmResolve = null;
+        }
+    }
 
     // ---------- DOM REFS ----------
     const userEmailSpan = document.getElementById('userEmail');
@@ -150,20 +143,21 @@ function closeConfirm(result) {
     const includeSignature = document.getElementById('includeSignature');
     const dtrSupervisor = document.getElementById('dtrSupervisor');
     const dtrSupervisorTitle = document.getElementById('dtrSupervisorTitle');
+
     // Edit modal refs
-const editModal = document.getElementById('editModal');
-const editModalClose = document.getElementById('editModalClose');
-const editCancelBtn = document.getElementById('editCancelBtn');
-const editShiftForm = document.getElementById('editShiftForm');
-const editDate = document.getElementById('editDate');
-const editMorningIn = document.getElementById('editMorningIn');
-const editMorningOut = document.getElementById('editMorningOut');
-const editAfternoonIn = document.getElementById('editAfternoonIn');
-const editAfternoonOut = document.getElementById('editAfternoonOut');
-const editOvertimeStart = document.getElementById('editOvertimeStart');
-const editOvertimeEnd = document.getElementById('editOvertimeEnd');
-const editTotalDuration = document.getElementById('editTotalDuration');
-let editShiftId = null;
+    const editModal = document.getElementById('editModal');
+    const editModalClose = document.getElementById('editModalClose');
+    const editCancelBtn = document.getElementById('editCancelBtn');
+    const editShiftForm = document.getElementById('editShiftForm');
+    const editDate = document.getElementById('editDate');
+    const editMorningIn = document.getElementById('editMorningIn');
+    const editMorningOut = document.getElementById('editMorningOut');
+    const editAfternoonIn = document.getElementById('editAfternoonIn');
+    const editAfternoonOut = document.getElementById('editAfternoonOut');
+    const editOvertimeStart = document.getElementById('editOvertimeStart');
+    const editOvertimeEnd = document.getElementById('editOvertimeEnd');
+    const editTotalDuration = document.getElementById('editTotalDuration');
+    let editShiftId = null;
 
     // ---------- AUTH HELPERS ----------
     function getToken() {
@@ -202,40 +196,22 @@ let editShiftId = null;
 
     // ---------- LOAD USER ----------
     function loadUser() {
-    const userStr = localStorage.getItem('ojt_user');
-    console.log('loadUser() called, userStr:', userStr); // Debug
-
-    if (userStr) {
-        try {
-            const user = JSON.parse(userStr);
-            console.log('User parsed:', user); // Debug
-
-            // Try to get the email span by ID
-            let emailSpan = document.getElementById('userEmail');
-            if (!emailSpan) {
-                // Fallback: find by class or any span inside .nav-user
-                emailSpan = document.querySelector('.nav-user span');
-                console.log('Falling back to .nav-user span'); // Debug
+        const userStr = localStorage.getItem('ojt_user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                if (userEmailSpan) {
+                    userEmailSpan.textContent = user.email || 'No email';
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
             }
-
-            if (emailSpan) {
-                emailSpan.textContent = user.email || 'No email';
-                console.log('Email set to:', user.email); // Debug
-            } else {
-                console.error('Email span element not found!');
-            }
-        } catch (error) {
-            console.error('Error parsing user data:', error);
         }
-    } else {
-        console.warn('No user data found in localStorage');
     }
-}
 
     // ---------- LOAD DATA ----------
     async function loadDashboardData() {
         try {
-            // Load stats
             const stats = await apiFetch('/stats/summary');
             totalHoursEl.textContent = stats.totalHours.toFixed(1);
             targetHoursEl.textContent = stats.targetHours;
@@ -250,15 +226,12 @@ let editShiftId = null;
             completionRateEl.textContent = stats.completionRate.toFixed(1) + '%';
             totalDaysEl.textContent = stats.totalDays;
 
-            // Load target hours
             const settings = await apiFetch('/settings/target');
             targetInput.value = settings.targetHours;
 
-            // Load shifts
             const shiftsData = await apiFetch('/shifts');
             renderTable(shiftsData.shifts);
 
-            // Load DTR info
             const dtrInfo = await apiFetch('/settings/dtr-info');
             if (dtrInfo.dtrInfo) {
                 dtrFullName.value = dtrInfo.dtrInfo.full_name || '';
@@ -277,108 +250,102 @@ let editShiftId = null;
     }
 
     // ---------- RENDER TABLE ----------
-function renderTable(shifts) {
-    if (!shifts || shifts.length === 0) {
-        historyBody.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>No shifts logged yet. Start tracking!</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    // Sort by date (oldest first)
-    const sorted = [...shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    let html = '';
-    let currentMonth = '';
-    let currentYear = '';
-
-    sorted.forEach(shift => {
-        const shiftDate = new Date(shift.date);
-        const month = shiftDate.toLocaleString('default', { month: 'long' });
-        const year = shiftDate.getFullYear();
-        const monthYear = `${month} ${year}`;
-
-        // Check if month changed → add month header
-        if (monthYear !== currentMonth) {
-            currentMonth = monthYear;
-            currentYear = year;
-
-            html += `
-                <tr class="month-header">
+    function renderTable(shifts) {
+        if (!shifts || shifts.length === 0) {
+            historyBody.innerHTML = `
+                <tr>
                     <td colspan="6">
-                        <i class="fas fa-calendar-alt" style="color:var(--primary); margin-right:8px;"></i>
-                        ${monthYear}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No shifts logged yet. Start tracking!</p>
+                        </div>
                     </td>
                 </tr>
             `;
+            return;
         }
 
-        const total = parseFloat(shift.total) || 0;
+        const sorted = [...shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        const morningStr = shift.morning_in && shift.morning_out ?
-            `${formatTime(shift.morning_in)} - ${formatTime(shift.morning_out)}<br>(${calcDuration(shift.morning_in, shift.morning_out).toFixed(2)} hrs)` :
-            '-';
-        const afternoonStr = shift.afternoon_in && shift.afternoon_out ?
-            `${formatTime(shift.afternoon_in)} - ${formatTime(shift.afternoon_out)}<br>(${calcDuration(shift.afternoon_in, shift.afternoon_out).toFixed(2)} hrs)` :
-            '-';
-        const otStr = shift.overtime_in && shift.overtime_out ?
-            `${formatTime(shift.overtime_in)} - ${formatTime(shift.overtime_out)}<br>(${calcDuration(shift.overtime_in, shift.overtime_out).toFixed(2)} hrs)` :
-            '-';
+        let html = '';
+        let currentMonth = '';
 
-        html += `
-            <tr>
-                <td>${formatDate(shift.date)}</td>
-                <td>${morningStr}</td>
-                <td>${afternoonStr}</td>
-                <td>${otStr}</td>
-                <td>${total.toFixed(2)} hrs</td>
-                <td>
-                    <div class="actions no-print">
-                        <button class="btn btn-primary btn-sm edit-btn" data-id="${shift.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="${shift.id}">Delete</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
+        sorted.forEach(shift => {
+            const shiftDate = new Date(shift.date);
+            const month = shiftDate.toLocaleString('default', { month: 'long' });
+            const year = shiftDate.getFullYear();
+            const monthYear = `${month} ${year}`;
 
-    historyBody.innerHTML = html;
-
-    // Attach event listeners for Edit/Delete
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const id = parseInt(this.dataset.id);
-            const confirmed = await showConfirm(
-                'This shift will be permanently removed from your records.',
-                'Delete Shift?',
-                'Yes, Delete',
-                'Cancel'
-            );
-            if (confirmed) {
-                deleteShift(id);
+            if (monthYear !== currentMonth) {
+                currentMonth = monthYear;
+                html += `
+                    <tr class="month-header">
+                        <td colspan="6">
+                            <i class="fas fa-calendar-alt" style="color:var(--primary); margin-right:8px;"></i>
+                            ${monthYear}
+                        </td>
+                    </tr>
+                `;
             }
-        });
-    });
 
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = parseInt(this.dataset.id);
-            const shift = shifts.find(s => s.id === id);
-            if (shift) {
-                openEditModal(shift);
-            } else {
-                showAlert('Shift not found.', 'error');
-            }
+            const total = parseFloat(shift.total) || 0;
+
+            const morningStr = shift.morning_in && shift.morning_out ?
+                `${formatTime(shift.morning_in)} - ${formatTime(shift.morning_out)}<br>(${calcDuration(shift.morning_in, shift.morning_out).toFixed(2)} hrs)` :
+                '-';
+            const afternoonStr = shift.afternoon_in && shift.afternoon_out ?
+                `${formatTime(shift.afternoon_in)} - ${formatTime(shift.afternoon_out)}<br>(${calcDuration(shift.afternoon_in, shift.afternoon_out).toFixed(2)} hrs)` :
+                '-';
+            const otStr = shift.overtime_in && shift.overtime_out ?
+                `${formatTime(shift.overtime_in)} - ${formatTime(shift.overtime_out)}<br>(${calcDuration(shift.overtime_in, shift.overtime_out).toFixed(2)} hrs)` :
+                '-';
+
+            html += `
+                <tr>
+                    <td>${formatDate(shift.date)}</td>
+                    <td>${morningStr}</td>
+                    <td>${afternoonStr}</td>
+                    <td>${otStr}</td>
+                    <td>${total.toFixed(2)} hrs</td>
+                    <td>
+                        <div class="actions no-print">
+                            <button class="btn btn-primary btn-sm edit-btn" data-id="${shift.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${shift.id}">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         });
-    });
-}
+
+        historyBody.innerHTML = html;
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const id = parseInt(this.dataset.id);
+                const confirmed = await showConfirm(
+                    'This shift will be permanently removed from your records.',
+                    'Delete Shift?',
+                    'Yes, Delete',
+                    'Cancel'
+                );
+                if (confirmed) {
+                    deleteShift(id);
+                }
+            });
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                const shift = shifts.find(s => s.id === id);
+                if (shift) {
+                    openEditModal(shift);
+                } else {
+                    showAlert('Shift not found.', 'error');
+                }
+            });
+        });
+    }
 
     // ---------- HELPERS ----------
     function formatTime(timeStr) {
@@ -423,17 +390,14 @@ function renderTable(shifts) {
         const aIn = afternoonIn.value;
         const aOut = afternoonOut.value;
 
-        // Validate morning and afternoon (required)
         if (!mIn || !mOut || !aIn || !aOut) {
             showAlert('Please fill in morning and afternoon clock times.', 'warning');
             return;
         }
 
-        // Calculate durations
         const mDur = calcDuration(mIn, mOut);
         const aDur = calcDuration(aIn, aOut);
 
-        // Overtime is OPTIONAL – only calculate if BOTH times are entered
         let oDur = 0;
         let otIn = null;
         let otOut = null;
@@ -469,7 +433,6 @@ function renderTable(shifts) {
             });
             showAlert('Shift saved successfully!', 'success');
             loadDashboardData();
-            // Reset form (keep date, reset times to defaults)
             morningIn.value = '08:00';
             morningOut.value = '12:00';
             afternoonIn.value = '13:00';
@@ -492,54 +455,85 @@ function renderTable(shifts) {
         }
     }
 
-    // async function loadShiftForEdit(id) {
-    //     try {
-    //         const data = await apiFetch(`/shifts/${id}`);
-    //         const shift = data.shift;
-    //         if (!shift) return;
+    // ---------- CALCULATE DURATIONS ----------
+    function calculateDurations() {
+        const mDur = calcDuration(morningIn.value, morningOut.value);
+        morningDurationSpan.textContent = mDur.toFixed(2);
 
-    //         shiftDate.value = shift.date;
-    //         morningIn.value = shift.morning_in || '08:00';
-    //         morningOut.value = shift.morning_out || '12:00';
-    //         afternoonIn.value = shift.afternoon_in || '13:00';
-    //         afternoonOut.value = shift.afternoon_out || '17:00';
-    //         otStart.value = shift.overtime_in || '';
-    //         otEnd.value = shift.overtime_out || '';
-    //         calculateDurations();
+        const aDur = calcDuration(afternoonIn.value, afternoonOut.value);
+        afternoonDurationSpan.textContent = aDur.toFixed(2);
 
-    //         shiftForm.onsubmit = async function(e) {
-    //             e.preventDefault();
-    //             await updateShift(id);
-    //             shiftForm.onsubmit = createShift;
-    //         };
-
-    //         shiftForm.scrollIntoView({ behavior: 'smooth' });
-
-    //     } catch (error) {
-    //         showAlert('Failed to load shift: ' + error.message, 'error');
-    //     }
-    // }
-
-    async function updateShift(id) {
-        const date = shiftDate.value;
-        const mIn = morningIn.value;
-        const mOut = morningOut.value;
-        const aIn = afternoonIn.value;
-        const aOut = afternoonOut.value;
-
-        // Overtime is OPTIONAL – only calculate if BOTH times are entered
         let oDur = 0;
-        let otIn = null;
-        let otOut = null;
-
         if (otStart.value && otEnd.value) {
-            otIn = otStart.value;
-            otOut = otEnd.value;
+            oDur = calcDuration(otStart.value, otEnd.value);
+        }
+        otDurationSpan.textContent = oDur.toFixed(2);
+
+        const total = mDur + aDur + oDur;
+        totalShiftDurationSpan.textContent = total.toFixed(2);
+    }
+
+    // ---------- EDIT SHIFT MODAL ----------
+    function openEditModal(shift) {
+        editShiftId = shift.id;
+        editDate.value = shift.date;
+        editMorningIn.value = shift.morning_in || '08:00';
+        editMorningOut.value = shift.morning_out || '12:00';
+        editAfternoonIn.value = shift.afternoon_in || '13:00';
+        editAfternoonOut.value = shift.afternoon_out || '17:00';
+        editOvertimeStart.value = shift.overtime_in || '';
+        editOvertimeEnd.value = shift.overtime_out || '';
+        calculateEditDuration();
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+        editModal.classList.remove('active');
+        document.body.style.overflow = '';
+        editShiftId = null;
+    }
+
+    function calculateEditDuration() {
+        const mIn = editMorningIn.value;
+        const mOut = editMorningOut.value;
+        const aIn = editAfternoonIn.value;
+        const aOut = editAfternoonOut.value;
+        const otIn = editOvertimeStart.value;
+        const otOut = editOvertimeEnd.value;
+
+        const mDur = calcDuration(mIn, mOut);
+        const aDur = calcDuration(aIn, aOut);
+        let oDur = 0;
+        if (otIn && otOut) {
             oDur = calcDuration(otIn, otOut);
+        }
+        const total = mDur + aDur + oDur;
+        editTotalDuration.textContent = total.toFixed(2);
+    }
+
+    async function handleEditSubmit(e) {
+        e.preventDefault();
+
+        const date = editDate.value;
+        const mIn = editMorningIn.value;
+        const mOut = editMorningOut.value;
+        const aIn = editAfternoonIn.value;
+        const aOut = editAfternoonOut.value;
+        const otIn = editOvertimeStart.value || null;
+        const otOut = editOvertimeEnd.value || null;
+
+        if (!date || !mIn || !mOut || !aIn || !aOut) {
+            showAlert('Please fill in all required fields.', 'warning');
+            return;
         }
 
         const mDur = calcDuration(mIn, mOut);
         const aDur = calcDuration(aIn, aOut);
+        let oDur = 0;
+        if (otIn && otOut) {
+            oDur = calcDuration(otIn, otOut);
+        }
         const total = mDur + aDur + oDur;
 
         if (total === 0) {
@@ -559,138 +553,17 @@ function renderTable(shifts) {
         };
 
         try {
-            await apiFetch(`/shifts/${id}`, {
+            await apiFetch(`/shifts/${editShiftId}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload)
             });
             showAlert('Shift updated successfully!', 'success');
+            closeEditModal();
             loadDashboardData();
-            // Reset form to default
-            morningIn.value = '08:00';
-            morningOut.value = '12:00';
-            afternoonIn.value = '13:00';
-            afternoonOut.value = '17:00';
-            otStart.value = '';
-            otEnd.value = '';
-            calculateDurations();
         } catch (error) {
             showAlert('Failed to update shift: ' + error.message, 'error');
         }
     }
-
-    // ---------- CALCULATE DURATIONS ----------
-    function calculateDurations() {
-        const mDur = calcDuration(morningIn.value, morningOut.value);
-        morningDurationSpan.textContent = mDur.toFixed(2);
-
-        const aDur = calcDuration(afternoonIn.value, afternoonOut.value);
-        afternoonDurationSpan.textContent = aDur.toFixed(2);
-
-        // Overtime – only calculate if BOTH times are entered
-        let oDur = 0;
-        if (otStart.value && otEnd.value) {
-            oDur = calcDuration(otStart.value, otEnd.value);
-        }
-        otDurationSpan.textContent = oDur.toFixed(2);
-
-        const total = mDur + aDur + oDur;
-        totalShiftDurationSpan.textContent = total.toFixed(2);
-    }
-
-    // ---------- EDIT SHIFT MODAL ----------
-function openEditModal(shift) {
-    editShiftId = shift.id;
-    editDate.value = shift.date;
-    editMorningIn.value = shift.morning_in || '08:00';
-    editMorningOut.value = shift.morning_out || '12:00';
-    editAfternoonIn.value = shift.afternoon_in || '13:00';
-    editAfternoonOut.value = shift.afternoon_out || '17:00';
-    editOvertimeStart.value = shift.overtime_in || '';
-    editOvertimeEnd.value = shift.overtime_out || '';
-    
-    calculateEditDuration();
-    editModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeEditModal() {
-    editModal.classList.remove('active');
-    document.body.style.overflow = '';
-    editShiftId = null;
-}
-
-function calculateEditDuration() {
-    const mIn = editMorningIn.value;
-    const mOut = editMorningOut.value;
-    const aIn = editAfternoonIn.value;
-    const aOut = editAfternoonOut.value;
-    const otIn = editOvertimeStart.value;
-    const otOut = editOvertimeEnd.value;
-
-    const mDur = calcDuration(mIn, mOut);
-    const aDur = calcDuration(aIn, aOut);
-    
-    let oDur = 0;
-    if (otIn && otOut) {
-        oDur = calcDuration(otIn, otOut);
-    }
-    
-    const total = mDur + aDur + oDur;
-    editTotalDuration.textContent = total.toFixed(2);
-}
-
-async function handleEditSubmit(e) {
-    e.preventDefault();
-    
-    const date = editDate.value;
-    const mIn = editMorningIn.value;
-    const mOut = editMorningOut.value;
-    const aIn = editAfternoonIn.value;
-    const aOut = editAfternoonOut.value;
-    const otIn = editOvertimeStart.value || null;
-    const otOut = editOvertimeEnd.value || null;
-
-    if (!date || !mIn || !mOut || !aIn || !aOut) {
-        showAlert('Please fill in all required fields.', 'warning');
-        return;
-    }
-
-    const mDur = calcDuration(mIn, mOut);
-    const aDur = calcDuration(aIn, aOut);
-    let oDur = 0;
-    if (otIn && otOut) {
-        oDur = calcDuration(otIn, otOut);
-    }
-    const total = mDur + aDur + oDur;
-
-    if (total === 0) {
-        showAlert('Shift duration cannot be zero.', 'warning');
-        return;
-    }
-
-    const payload = {
-        date,
-        morning_in: mIn,
-        morning_out: mOut,
-        afternoon_in: aIn,
-        afternoon_out: aOut,
-        overtime_in: otIn,
-        overtime_out: otOut,
-        total
-    };
-
-    try {
-        await apiFetch(`/shifts/${editShiftId}`, {
-            method: 'PUT',
-            body: JSON.stringify(payload)
-        });
-        showAlert('Shift updated successfully!', 'success');
-        closeEditModal();
-        loadDashboardData();
-    } catch (error) {
-        showAlert('Failed to update shift: ' + error.message, 'error');
-    }
-}
 
     // ---------- UPDATE TARGET HOURS ----------
     async function updateTarget() {
@@ -713,109 +586,125 @@ async function handleEditSubmit(e) {
 
     // ---------- MODAL ----------
     function openModal() {
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
 
-    // Update period labels with current month/year
-    const now = new Date();
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    const currentMonth = monthNames[now.getMonth()];
-    const currentYear = now.getFullYear();
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = monthNames[now.getMonth()];
+        const currentYear = now.getFullYear();
 
-    // Update the radio button labels
-    const labels = document.querySelectorAll('.period-option span');
-    if (labels.length >= 2) {
-        labels[0].textContent = `📅 This Month (${currentMonth})`;
-        labels[1].textContent = `📆 This Year (${currentYear})`;
+        const labels = document.querySelectorAll('.period-option span');
+        if (labels.length >= 2) {
+            labels[0].textContent = `📅 This Month (${currentMonth})`;
+            labels[1].textContent = `📆 This Year (${currentYear})`;
+        }
+
+        apiFetch('/settings/dtr-info').then(data => {
+            if (data.dtrInfo) {
+                dtrFullName.value = data.dtrInfo.full_name || '';
+                dtrSchool.value = data.dtrInfo.school || '';
+                dtrDepartment.value = data.dtrInfo.department || '';
+                dtrCompany.value = data.dtrInfo.company || '';
+                dtrPosition.value = data.dtrInfo.position || '';
+                dtrSupervisor.value = data.dtrInfo.supervisor || '';
+                dtrSupervisorTitle.value = data.dtrInfo.supervisor_title || '';
+            }
+        }).catch(console.error);
     }
 
-    // Load DTR info
-    apiFetch('/settings/dtr-info').then(data => {
-        if (data.dtrInfo) {
-            dtrFullName.value = data.dtrInfo.full_name || '';
-            dtrSchool.value = data.dtrInfo.school || '';
-            dtrDepartment.value = data.dtrInfo.department || '';
-            dtrCompany.value = data.dtrInfo.company || '';
-            dtrPosition.value = data.dtrInfo.position || '';
-            dtrSupervisor.value = data.dtrInfo.supervisor || '';
-            dtrSupervisorTitle.value = data.dtrInfo.supervisor_title || '';
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    async function saveDtrInfo() {
+        const payload = {
+            fullName: dtrFullName.value,
+            school: dtrSchool.value,
+            department: dtrDepartment.value,
+            company: dtrCompany.value,
+            position: dtrPosition.value,
+            supervisor: dtrSupervisor.value,
+            supervisorTitle: dtrSupervisorTitle.value
+        };
+        try {
+            await apiFetch('/settings/dtr-info', {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+        } catch (error) {
+            console.error('Failed to save DTR info:', error);
         }
-    }).catch(console.error);
-}
+    }
 
     // ---------- EXPORT FUNCTIONS ----------
     async function downloadExport(endpoint, filename) {
-    try {
-        // Get selected period
-        const selectedPeriod = document.querySelector('input[name="period"]:checked');
-        const period = selectedPeriod ? selectedPeriod.value : 'month';
+        try {
+            const selectedPeriod = document.querySelector('input[name="period"]:checked');
+            const period = selectedPeriod ? selectedPeriod.value : 'month';
 
-        // Get shifts from current dashboard data
-        const shiftsData = await apiFetch('/shifts');
-        let shifts = shiftsData.shifts || [];
+            const shiftsData = await apiFetch('/shifts');
+            let shifts = shiftsData.shifts || [];
 
-        if (shifts.length === 0) {
-            showAlert('No shifts found. Please log some shifts first.', 'warning');
-            return;
-        }
+            if (shifts.length === 0) {
+                showAlert('No shifts found. Please log some shifts first.', 'warning');
+                return;
+            }
 
-        // Filter shifts based on selected period
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth();
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
 
-        let filteredShifts = [];
+            let filteredShifts = [];
 
-        if (period === 'month') {
-            // Filter: only current month and year
-            filteredShifts = shifts.filter(shift => {
-                const shiftDate = new Date(shift.date);
-                return shiftDate.getMonth() === currentMonth && 
-                       shiftDate.getFullYear() === currentYear;
+            if (period === 'month') {
+                filteredShifts = shifts.filter(shift => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate.getMonth() === currentMonth &&
+                        shiftDate.getFullYear() === currentYear;
+                });
+            } else {
+                filteredShifts = shifts.filter(shift => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate.getFullYear() === currentYear;
+                });
+            }
+
+            if (filteredShifts.length === 0) {
+                const periodLabel = period === 'month' ? 'this month' : 'this year';
+                showAlert(`No shifts found for ${periodLabel}. Please log some shifts first.`, 'warning');
+                return;
+            }
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ shifts: filteredShifts })
             });
-        } else {
-            // Filter: only current year
-            filteredShifts = shifts.filter(shift => {
-                const shiftDate = new Date(shift.date);
-                return shiftDate.getFullYear() === currentYear;
-            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            showAlert('Failed to export: ' + error.message, 'error');
         }
-
-        if (filteredShifts.length === 0) {
-            const periodLabel = period === 'month' ? 'this month' : 'this year';
-            showAlert(`No shifts found for ${periodLabel}. Please log some shifts first.`, 'warning');
-            return;
-        }
-
-        // Call export endpoint with filtered shifts
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST', // Change to POST to send filtered data
-            headers: {
-                ...getHeaders(),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ shifts: filteredShifts })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Export failed');
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        showAlert('Failed to export: ' + error.message, 'error');
     }
-}
 
     // ---------- MODAL EVENT LISTENERS ----------
     printBtn.addEventListener('click', openModal);
@@ -833,25 +722,23 @@ async function handleEditSubmit(e) {
     });
 
     // ---------- EDIT MODAL EVENT LISTENERS ----------
-editModalClose.addEventListener('click', closeEditModal);
-editCancelBtn.addEventListener('click', closeEditModal);
-editModal.addEventListener('click', function(e) {
-    if (e.target === editModal) closeEditModal();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && editModal.classList.contains('active')) {
-        closeEditModal();
-    }
-});
+    editModalClose.addEventListener('click', closeEditModal);
+    editCancelBtn.addEventListener('click', closeEditModal);
+    editModal.addEventListener('click', function(e) {
+        if (e.target === editModal) closeEditModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && editModal.classList.contains('active')) {
+            closeEditModal();
+        }
+    });
 
-// Auto-calculate duration on time change
-document.querySelectorAll('#editShiftForm input[type="time"]').forEach(input => {
-    input.addEventListener('change', calculateEditDuration);
-    input.addEventListener('input', calculateEditDuration);
-});
+    document.querySelectorAll('#editShiftForm input[type="time"]').forEach(input => {
+        input.addEventListener('change', calculateEditDuration);
+        input.addEventListener('input', calculateEditDuration);
+    });
 
-// Form submit
-editShiftForm.addEventListener('submit', handleEditSubmit);
+    editShiftForm.addEventListener('submit', handleEditSubmit);
 
     // ---------- EXPORT BUTTONS ----------
     printPdfBtn.addEventListener('click', function() {
@@ -900,7 +787,6 @@ editShiftForm.addEventListener('submit', handleEditSubmit);
         if (!morningOut.value) morningOut.value = '12:00';
         if (!afternoonIn.value) afternoonIn.value = '13:00';
         if (!afternoonOut.value) afternoonOut.value = '17:00';
-        // Overtime fields start empty (optional)
         otStart.value = '';
         otEnd.value = '';
 
