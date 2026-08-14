@@ -202,12 +202,35 @@ let editShiftId = null;
 
     // ---------- LOAD USER ----------
     function loadUser() {
-        const userStr = localStorage.getItem('ojt_user');
-        if (userStr) {
+    const userStr = localStorage.getItem('ojt_user');
+    console.log('loadUser() called, userStr:', userStr); // Debug
+
+    if (userStr) {
+        try {
             const user = JSON.parse(userStr);
-            userEmailSpan.textContent = user.email || 'No email';
+            console.log('User parsed:', user); // Debug
+
+            // Try to get the email span by ID
+            let emailSpan = document.getElementById('userEmail');
+            if (!emailSpan) {
+                // Fallback: find by class or any span inside .nav-user
+                emailSpan = document.querySelector('.nav-user span');
+                console.log('Falling back to .nav-user span'); // Debug
+            }
+
+            if (emailSpan) {
+                emailSpan.textContent = user.email || 'No email';
+                console.log('Email set to:', user.email); // Debug
+            } else {
+                console.error('Email span element not found!');
+            }
+        } catch (error) {
+            console.error('Error parsing user data:', error);
         }
+    } else {
+        console.warn('No user data found in localStorage');
     }
+}
 
     // ---------- LOAD DATA ----------
     async function loadDashboardData() {
