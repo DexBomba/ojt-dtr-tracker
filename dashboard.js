@@ -595,12 +595,43 @@
         const currentMonth = monthNames[now.getMonth()];
         const currentYear = now.getFullYear();
 
+        // Update "This Month" and "This Year" labels
         const labels = document.querySelectorAll('.period-option span');
         if (labels.length >= 2) {
-            labels[0].textContent = `📅 This Month (${currentMonth})`;
+            labels[0].textContent = `📅 This Month (${currentMonth} ${currentYear})`;
             labels[1].textContent = `📆 This Year (${currentYear})`;
         }
 
+        // Populate custom year dropdown (2020 to current year)
+        const yearSelect = document.getElementById('customYear');
+        if (yearSelect) {
+            yearSelect.innerHTML = '';
+            for (let y = 2020; y <= currentYear; y++) {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                if (y === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Auto-select current month in custom month dropdown
+        const monthSelect = document.getElementById('customMonth');
+        if (monthSelect) {
+            monthSelect.value = now.getMonth();
+        }
+
+        // Show/hide custom month selectors based on radio selection
+        const customSelectors = document.querySelector('.custom-month-selectors');
+        document.querySelectorAll('input[name="period"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (customSelectors) {
+                    customSelectors.style.display = this.value === 'custom' ? 'flex' : 'none';
+                }
+            });
+        });
+
+        // Load DTR info
         apiFetch('/settings/dtr-info').then(data => {
             if (data.dtrInfo) {
                 dtrFullName.value = data.dtrInfo.full_name || '';
@@ -658,22 +689,38 @@
             const currentMonth = now.getMonth();
 
             let filteredShifts = [];
+            let periodLabel = '';
 
             if (period === 'month') {
+                // This Month
                 filteredShifts = shifts.filter(shift => {
                     const shiftDate = new Date(shift.date);
                     return shiftDate.getMonth() === currentMonth &&
-                        shiftDate.getFullYear() === currentYear;
+                           shiftDate.getFullYear() === currentYear;
                 });
-            } else {
+                periodLabel = 'this month';
+            } else if (period === 'year') {
+                // This Year
                 filteredShifts = shifts.filter(shift => {
                     const shiftDate = new Date(shift.date);
                     return shiftDate.getFullYear() === currentYear;
                 });
+                periodLabel = 'this year';
+            } else if (period === 'custom') {
+                // Custom Month
+                const customMonth = parseInt(document.getElementById('customMonth').value);
+                const customYear = parseInt(document.getElementById('customYear').value);
+                filteredShifts = shifts.filter(shift => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate.getMonth() === customMonth &&
+                           shiftDate.getFullYear() === customYear;
+                });
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                    'July', 'August', 'September', 'October', 'November', 'December'];
+                periodLabel = `${monthNames[customMonth]} ${customYear}`;
             }
 
             if (filteredShifts.length === 0) {
-                const periodLabel = period === 'month' ? 'this month' : 'this year';
                 showAlert(`No shifts found for ${periodLabel}. Please log some shifts first.`, 'warning');
                 return;
             }
