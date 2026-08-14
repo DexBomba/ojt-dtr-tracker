@@ -393,6 +393,28 @@ a {
     border-color: var(--primary-light);
 }
 
+/* ---------- MONTH HEADERS IN SHIFT HISTORY ---------- */
+.month-header td {
+    background: var(--bg) !important;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--secondary);
+    padding: 10px 16px !important;
+    border-bottom: 2px solid var(--border);
+    border-top: 2px solid var(--border);
+    font-weight: 700;
+}
+
+.month-header td i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+/* Make sure month header background stays consistent */
+.history-body .month-header:hover td {
+    background: var(--bg) !important;
+}
+
 /* Shift Form */
 .shift-form .form-row {
     display: grid;
