@@ -254,84 +254,108 @@ let editShiftId = null;
     }
 
     // ---------- RENDER TABLE ----------
-    function renderTable(shifts) {
-        if (!shifts || shifts.length === 0) {
-            historyBody.innerHTML = `
-                <tr>
-                    <td colspan="6">
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <p>No shifts logged yet. Start tracking!</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
+function renderTable(shifts) {
+    if (!shifts || shifts.length === 0) {
+        historyBody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No shifts logged yet. Start tracking!</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-        const sorted = [...shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Sort by date (oldest first)
+    const sorted = [...shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        let html = '';
-        sorted.forEach(shift => {
-            const total = parseFloat(shift.total) || 0;
+    let html = '';
+    let currentMonth = '';
+    let currentYear = '';
 
-            const morningStr = shift.morning_in && shift.morning_out ?
-                `${formatTime(shift.morning_in)} - ${formatTime(shift.morning_out)}<br>(${calcDuration(shift.morning_in, shift.morning_out).toFixed(2)} hrs)` :
-                '-';
-            const afternoonStr = shift.afternoon_in && shift.afternoon_out ?
-                `${formatTime(shift.afternoon_in)} - ${formatTime(shift.afternoon_out)}<br>(${calcDuration(shift.afternoon_in, shift.afternoon_out).toFixed(2)} hrs)` :
-                '-';
-            const otStr = shift.overtime_in && shift.overtime_out ?
-                `${formatTime(shift.overtime_in)} - ${formatTime(shift.overtime_out)}<br>(${calcDuration(shift.overtime_in, shift.overtime_out).toFixed(2)} hrs)` :
-                '-';
+    sorted.forEach(shift => {
+        const shiftDate = new Date(shift.date);
+        const month = shiftDate.toLocaleString('default', { month: 'long' });
+        const year = shiftDate.getFullYear();
+        const monthYear = `${month} ${year}`;
+
+        // Check if month changed → add month header
+        if (monthYear !== currentMonth) {
+            currentMonth = monthYear;
+            currentYear = year;
 
             html += `
-                <tr>
-                    <td>${formatDate(shift.date)}</td>
-                    <td>${morningStr}</td>
-                    <td>${afternoonStr}</td>
-                    <td>${otStr}</td>
-                    <td>${total.toFixed(2)} hrs</td>
-                    <td>
-                        <div class="actions no-print">
-                            <button class="btn btn-primary btn-sm edit-btn" data-id="${shift.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${shift.id}">Delete</button>
-                        </div>
+                <tr class="month-header">
+                    <td colspan="6">
+                        <i class="fas fa-calendar-alt" style="color:var(--primary); margin-right:8px;"></i>
+                        ${monthYear}
                     </td>
                 </tr>
             `;
+        }
+
+        const total = parseFloat(shift.total) || 0;
+
+        const morningStr = shift.morning_in && shift.morning_out ?
+            `${formatTime(shift.morning_in)} - ${formatTime(shift.morning_out)}<br>(${calcDuration(shift.morning_in, shift.morning_out).toFixed(2)} hrs)` :
+            '-';
+        const afternoonStr = shift.afternoon_in && shift.afternoon_out ?
+            `${formatTime(shift.afternoon_in)} - ${formatTime(shift.afternoon_out)}<br>(${calcDuration(shift.afternoon_in, shift.afternoon_out).toFixed(2)} hrs)` :
+            '-';
+        const otStr = shift.overtime_in && shift.overtime_out ?
+            `${formatTime(shift.overtime_in)} - ${formatTime(shift.overtime_out)}<br>(${calcDuration(shift.overtime_in, shift.overtime_out).toFixed(2)} hrs)` :
+            '-';
+
+        html += `
+            <tr>
+                <td>${formatDate(shift.date)}</td>
+                <td>${morningStr}</td>
+                <td>${afternoonStr}</td>
+                <td>${otStr}</td>
+                <td>${total.toFixed(2)} hrs</td>
+                <td>
+                    <div class="actions no-print">
+                        <button class="btn btn-primary btn-sm edit-btn" data-id="${shift.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${shift.id}">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    historyBody.innerHTML = html;
+
+    // Attach event listeners for Edit/Delete
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = parseInt(this.dataset.id);
+            const confirmed = await showConfirm(
+                'This shift will be permanently removed from your records.',
+                'Delete Shift?',
+                'Yes, Delete',
+                'Cancel'
+            );
+            if (confirmed) {
+                deleteShift(id);
+            }
         });
-        historyBody.innerHTML = html;
-
-        // Attach event listeners for Edit/Delete
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', async function() {
-        const id = parseInt(this.dataset.id);
-        const confirmed = await showConfirm(
-            'This shift will be permanently removed from your records.',
-            'Delete Shift?',
-            'Yes, Delete',
-            'Cancel'
-        );
-        if (confirmed) {
-            deleteShift(id);
-        }
     });
-});
 
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = parseInt(this.dataset.id);
-        // Find the shift data from the shifts array
-        const shift = shifts.find(s => s.id === id);
-        if (shift) {
-            openEditModal(shift);
-        } else {
-            showAlert('Shift not found.', 'error');
-        }
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const shift = shifts.find(s => s.id === id);
+            if (shift) {
+                openEditModal(shift);
+            } else {
+                showAlert('Shift not found.', 'error');
+            }
+        });
     });
-});
-    }
+}
 
     // ---------- HELPERS ----------
     function formatTime(timeStr) {
