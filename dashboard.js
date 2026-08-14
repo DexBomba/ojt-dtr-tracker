@@ -269,7 +269,7 @@ let editShiftId = null;
             return;
         }
 
-        const sorted = [...shifts].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sorted = [...shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
         let html = '';
         sorted.forEach(shift => {
