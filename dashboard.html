@@ -62,7 +62,7 @@
                     </div>
                     <div class="progress-text" id="progressLabel">0%</div>
                 </div>
-            </div>v
+            </div>
 
             <!-- Hour Settings -->
             <div class="card" style="margin-bottom: 30px;">
@@ -177,19 +177,19 @@
             </div>
 
             <!-- ====== CUSTOM CONFIRM MODAL ====== -->
-<div class="confirm-overlay" id="confirmModal">
-    <div class="confirm-modal">
-        <div class="confirm-icon">
-            <i class="fas fa-exclamation-circle"></i>
-        </div>
-        <h3 id="confirmTitle">Are you sure?</h3>
-        <p id="confirmMessage">This action cannot be undone.</p>
-        <div class="confirm-actions">
-            <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
-            <button class="btn btn-danger" id="confirmOk">Yes, Delete</button>
-        </div>
-    </div>
-</div>
+            <div class="confirm-overlay" id="confirmModal">
+                <div class="confirm-modal">
+                    <div class="confirm-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h3 id="confirmTitle">Are you sure?</h3>
+                    <p id="confirmMessage">This action cannot be undone.</p>
+                    <div class="confirm-actions">
+                        <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+                        <button class="btn btn-danger" id="confirmOk">Yes, Delete</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- Shift History -->
             <div class="history-section">
@@ -233,22 +233,50 @@
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <p>Fill in your details. This will appear on your printed DTR. Your info is saved automatically.</p>
+
             <!-- Period Selection -->
-<div class="period-selector">
-    <label style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:6px; color:var(--secondary);">
-        <i class="fas fa-calendar-alt"></i> Select Period
-    </label>
-    <div class="period-options">
-        <label class="period-option">
-            <input type="radio" name="period" value="month" checked />
-            <span>📅 This Month ({{currentMonth}})</span>
-        </label>
-        <label class="period-option">
-            <input type="radio" name="period" value="year" />
-            <span>📆 This Year ({{currentYear}})</span>
-        </label>
-    </div>
-</div>
+            <div class="period-selector">
+                <label style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:6px; color:var(--secondary);">
+                    <i class="fas fa-calendar-alt"></i> Select Period
+                </label>
+                <div class="period-options">
+                    <!-- This Month -->
+                    <label class="period-option">
+                        <input type="radio" name="period" value="month" checked />
+                        <span>📅 This Month ({{currentMonth}})</span>
+                    </label>
+                    <!-- This Year -->
+                    <label class="period-option">
+                        <input type="radio" name="period" value="year" />
+                        <span>📆 This Year ({{currentYear}})</span>
+                    </label>
+                    <!-- Custom Month -->
+                    <label class="period-option">
+                        <input type="radio" name="period" value="custom" />
+                        <span>📅 Custom Month</span>
+                    </label>
+                    <!-- Custom month selectors (hidden by default) -->
+                    <div class="custom-month-selectors" style="display:none; margin-top:8px;">
+                        <select id="customMonth" style="padding:6px 12px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:0.9rem;">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7" selected>August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                        <select id="customYear" style="padding:6px 12px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:0.9rem;">
+                            <!-- Years populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+            </div>
 
             <form id="dtrForm">
                 <div class="form-group">
@@ -305,79 +333,78 @@
     </div>
 
     <!-- ====== EDIT SHIFT MODAL ====== -->
-<div class="edit-modal-overlay" id="editModal">
-    <div class="edit-modal">
-        <div class="edit-modal-header">
-            <h2><i class="fas fa-edit" style="color:var(--primary);"></i> Edit Shift</h2>
-            <button class="edit-modal-close" id="editModalClose">&times;</button>
+    <div class="edit-modal-overlay" id="editModal">
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h2><i class="fas fa-edit" style="color:var(--primary);"></i> Edit Shift</h2>
+                <button class="edit-modal-close" id="editModalClose">&times;</button>
+            </div>
+            <form id="editShiftForm">
+                <div class="edit-form-group">
+                    <label for="editDate">Date <span class="required">*</span></label>
+                    <input type="date" id="editDate" required />
+                </div>
+
+                <div class="edit-form-row">
+                    <div class="edit-form-group">
+                        <label for="editMorningIn">Morning In <span class="required">*</span></label>
+                        <input type="time" id="editMorningIn" required />
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="editMorningOut">Morning Out <span class="required">*</span></label>
+                        <input type="time" id="editMorningOut" required />
+                    </div>
+                </div>
+
+                <div class="edit-form-row">
+                    <div class="edit-form-group">
+                        <label for="editAfternoonIn">Afternoon In <span class="required">*</span></label>
+                        <input type="time" id="editAfternoonIn" required />
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="editAfternoonOut">Afternoon Out <span class="required">*</span></label>
+                        <input type="time" id="editAfternoonOut" required />
+                    </div>
+                </div>
+
+                <div class="edit-form-row">
+                    <div class="edit-form-group">
+                        <label for="editOvertimeStart">Overtime Start <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
+                        <input type="time" id="editOvertimeStart" />
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="editOvertimeEnd">Overtime End <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
+                        <input type="time" id="editOvertimeEnd" />
+                    </div>
+                </div>
+
+                <div class="edit-form-total">
+                    Total Duration: <span id="editTotalDuration">0.00</span> hours
+                </div>
+
+                <div class="edit-modal-actions">
+                    <button type="button" class="btn btn-secondary" id="editCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="editSaveBtn">
+                        <i class="fas fa-save"></i> Update Shift
+                    </button>
+                </div>
+            </form>
         </div>
-        <form id="editShiftForm">
-            <div class="edit-form-group">
-                <label for="editDate">Date <span class="required">*</span></label>
-                <input type="date" id="editDate" required />
-            </div>
-
-            <div class="edit-form-row">
-                <div class="edit-form-group">
-                    <label for="editMorningIn">Morning In <span class="required">*</span></label>
-                    <input type="time" id="editMorningIn" required />
-                </div>
-                <div class="edit-form-group">
-                    <label for="editMorningOut">Morning Out <span class="required">*</span></label>
-                    <input type="time" id="editMorningOut" required />
-                </div>
-            </div>
-
-            <div class="edit-form-row">
-                <div class="edit-form-group">
-                    <label for="editAfternoonIn">Afternoon In <span class="required">*</span></label>
-                    <input type="time" id="editAfternoonIn" required />
-                </div>
-                <div class="edit-form-group">
-                    <label for="editAfternoonOut">Afternoon Out <span class="required">*</span></label>
-                    <input type="time" id="editAfternoonOut" required />
-                </div>
-            </div>
-
-            <div class="edit-form-row">
-                <div class="edit-form-group">
-                    <label for="editOvertimeStart">Overtime Start <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
-                    <input type="time" id="editOvertimeStart" />
-                </div>
-                <div class="edit-form-group">
-                    <label for="editOvertimeEnd">Overtime End <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
-                    <input type="time" id="editOvertimeEnd" />
-                </div>
-            </div>
-
-            <div class="edit-form-total">
-                Total Duration: <span id="editTotalDuration">0.00</span> hours
-            </div>
-
-            <div class="edit-modal-actions">
-                <button type="button" class="btn btn-secondary" id="editCancelBtn">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="editSaveBtn">
-                    <i class="fas fa-save"></i> Update Shift
-                </button>
-            </div>
-        </form>
     </div>
-</div>
 
-   <!-- ====== FOOTER ====== -->
-<footer class="footer">
-    <div class="container">
-        <span>
-            © 2026 OJT DTR Tracker — For Student Intern Use 
-            <span class="footer-divider">·</span>
-            <a href="#">Privacy Policy</a>
-            <span class="footer-divider">·</span>
-            <a href="#">Terms of Service</a>
-            <span class="footer-divider">·</span>
-            Developed by fDexBomba
-        </span>
-    </div>
-</footer>
+    <!-- ====== FOOTER ====== -->
+    <footer class="footer">
+        <div class="container">
+            <span>
+                © 2026 OJT DTR Tracker — For Student Intern Use 
+                <span class="footer-divider">·</span>
+                <a href="#">Privacy Policy</a>
+                <span class="footer-divider">·</span>
+                <a href="#">Terms of Service</a>
+                <span class="footer-divider">·</span>
+                Developed by fDexBomba
+            </span>
+        </div>
     </footer>
 
     <script src="dashboard.js"></script>
