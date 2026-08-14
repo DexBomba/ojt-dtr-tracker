@@ -62,7 +62,7 @@
                     </div>
                     <div class="progress-text" id="progressLabel">0%</div>
                 </div>
-            </div>
+            </div>v
 
             <!-- Hour Settings -->
             <div class="card" style="margin-bottom: 30px;">
@@ -287,6 +287,66 @@
             </form>
         </div>
     </div>
+
+    <!-- ====== EDIT SHIFT MODAL ====== -->
+<div class="edit-modal-overlay" id="editModal">
+    <div class="edit-modal">
+        <div class="edit-modal-header">
+            <h2><i class="fas fa-edit" style="color:var(--primary);"></i> Edit Shift</h2>
+            <button class="edit-modal-close" id="editModalClose">&times;</button>
+        </div>
+        <form id="editShiftForm">
+            <div class="edit-form-group">
+                <label for="editDate">Date <span class="required">*</span></label>
+                <input type="date" id="editDate" required />
+            </div>
+
+            <div class="edit-form-row">
+                <div class="edit-form-group">
+                    <label for="editMorningIn">Morning In <span class="required">*</span></label>
+                    <input type="time" id="editMorningIn" required />
+                </div>
+                <div class="edit-form-group">
+                    <label for="editMorningOut">Morning Out <span class="required">*</span></label>
+                    <input type="time" id="editMorningOut" required />
+                </div>
+            </div>
+
+            <div class="edit-form-row">
+                <div class="edit-form-group">
+                    <label for="editAfternoonIn">Afternoon In <span class="required">*</span></label>
+                    <input type="time" id="editAfternoonIn" required />
+                </div>
+                <div class="edit-form-group">
+                    <label for="editAfternoonOut">Afternoon Out <span class="required">*</span></label>
+                    <input type="time" id="editAfternoonOut" required />
+                </div>
+            </div>
+
+            <div class="edit-form-row">
+                <div class="edit-form-group">
+                    <label for="editOvertimeStart">Overtime Start <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
+                    <input type="time" id="editOvertimeStart" />
+                </div>
+                <div class="edit-form-group">
+                    <label for="editOvertimeEnd">Overtime End <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">(Optional)</span></label>
+                    <input type="time" id="editOvertimeEnd" />
+                </div>
+            </div>
+
+            <div class="edit-form-total">
+                Total Duration: <span id="editTotalDuration">0.00</span> hours
+            </div>
+
+            <div class="edit-modal-actions">
+                <button type="button" class="btn btn-secondary" id="editCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="editSaveBtn">
+                    <i class="fas fa-save"></i> Update Shift
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
    <!-- ====== FOOTER ====== -->
 <footer class="footer">
