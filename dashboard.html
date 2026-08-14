@@ -233,6 +233,22 @@
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <p>Fill in your details. This will appear on your printed DTR. Your info is saved automatically.</p>
+            <!-- Period Selection -->
+<div class="period-selector">
+    <label style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:6px; color:var(--secondary);">
+        <i class="fas fa-calendar-alt"></i> Select Period
+    </label>
+    <div class="period-options">
+        <label class="period-option">
+            <input type="radio" name="period" value="month" checked />
+            <span>📅 This Month ({{currentMonth}})</span>
+        </label>
+        <label class="period-option">
+            <input type="radio" name="period" value="year" />
+            <span>📆 This Year ({{currentYear}})</span>
+        </label>
+    </div>
+</div>
 
             <form id="dtrForm">
                 <div class="form-group">
