@@ -690,71 +690,109 @@ async function handleEditSubmit(e) {
 
     // ---------- MODAL ----------
     function openModal() {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        apiFetch('/settings/dtr-info').then(data => {
-            if (data.dtrInfo) {
-                dtrFullName.value = data.dtrInfo.full_name || '';
-                dtrSchool.value = data.dtrInfo.school || '';
-                dtrDepartment.value = data.dtrInfo.department || '';
-                dtrCompany.value = data.dtrInfo.company || '';
-                dtrPosition.value = data.dtrInfo.position || '';
-                dtrSupervisor.value = data.dtrInfo.supervisor || '';
-                dtrSupervisorTitle.value = data.dtrInfo.supervisor_title || '';
-            }
-        }).catch(console.error);
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Update period labels with current month/year
+    const now = new Date();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    const currentMonth = monthNames[now.getMonth()];
+    const currentYear = now.getFullYear();
+
+    // Update the radio button labels
+    const labels = document.querySelectorAll('.period-option span');
+    if (labels.length >= 2) {
+        labels[0].textContent = `📅 This Month (${currentMonth})`;
+        labels[1].textContent = `📆 This Year (${currentYear})`;
     }
 
-    function closeModal() {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    async function saveDtrInfo() {
-        const payload = {
-            fullName: dtrFullName.value,
-            school: dtrSchool.value,
-            department: dtrDepartment.value,
-            company: dtrCompany.value,
-            position: dtrPosition.value,
-            supervisor: dtrSupervisor.value,
-            supervisorTitle: dtrSupervisorTitle.value
-        };
-        try {
-            await apiFetch('/settings/dtr-info', {
-                method: 'PUT',
-                body: JSON.stringify(payload)
-            });
-        } catch (error) {
-            console.error('Failed to save DTR info:', error);
+    // Load DTR info
+    apiFetch('/settings/dtr-info').then(data => {
+        if (data.dtrInfo) {
+            dtrFullName.value = data.dtrInfo.full_name || '';
+            dtrSchool.value = data.dtrInfo.school || '';
+            dtrDepartment.value = data.dtrInfo.department || '';
+            dtrCompany.value = data.dtrInfo.company || '';
+            dtrPosition.value = data.dtrInfo.position || '';
+            dtrSupervisor.value = data.dtrInfo.supervisor || '';
+            dtrSupervisorTitle.value = data.dtrInfo.supervisor_title || '';
         }
-    }
+    }).catch(console.error);
+}
 
     // ---------- EXPORT FUNCTIONS ----------
     async function downloadExport(endpoint, filename) {
-        try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                headers: getHeaders()
-            });
+    try {
+        // Get selected period
+        const selectedPeriod = document.querySelector('input[name="period"]:checked');
+        const period = selectedPeriod ? selectedPeriod.value : 'month';
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Export failed');
-            }
+        // Get shifts from current dashboard data
+        const shiftsData = await apiFetch('/shifts');
+        let shifts = shiftsData.shifts || [];
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            showAlert('Failed to export: ' + error.message, 'error');
+        if (shifts.length === 0) {
+            showAlert('No shifts found. Please log some shifts first.', 'warning');
+            return;
         }
+
+        // Filter shifts based on selected period
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+
+        let filteredShifts = [];
+
+        if (period === 'month') {
+            // Filter: only current month and year
+            filteredShifts = shifts.filter(shift => {
+                const shiftDate = new Date(shift.date);
+                return shiftDate.getMonth() === currentMonth && 
+                       shiftDate.getFullYear() === currentYear;
+            });
+        } else {
+            // Filter: only current year
+            filteredShifts = shifts.filter(shift => {
+                const shiftDate = new Date(shift.date);
+                return shiftDate.getFullYear() === currentYear;
+            });
+        }
+
+        if (filteredShifts.length === 0) {
+            const periodLabel = period === 'month' ? 'this month' : 'this year';
+            showAlert(`No shifts found for ${periodLabel}. Please log some shifts first.`, 'warning');
+            return;
+        }
+
+        // Call export endpoint with filtered shifts
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST', // Change to POST to send filtered data
+            headers: {
+                ...getHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ shifts: filteredShifts })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Export failed');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        showAlert('Failed to export: ' + error.message, 'error');
     }
+}
 
     // ---------- MODAL EVENT LISTENERS ----------
     printBtn.addEventListener('click', openModal);
