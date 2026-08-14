@@ -150,6 +150,20 @@ function closeConfirm(result) {
     const includeSignature = document.getElementById('includeSignature');
     const dtrSupervisor = document.getElementById('dtrSupervisor');
     const dtrSupervisorTitle = document.getElementById('dtrSupervisorTitle');
+    // Edit modal refs
+const editModal = document.getElementById('editModal');
+const editModalClose = document.getElementById('editModalClose');
+const editCancelBtn = document.getElementById('editCancelBtn');
+const editShiftForm = document.getElementById('editShiftForm');
+const editDate = document.getElementById('editDate');
+const editMorningIn = document.getElementById('editMorningIn');
+const editMorningOut = document.getElementById('editMorningOut');
+const editAfternoonIn = document.getElementById('editAfternoonIn');
+const editAfternoonOut = document.getElementById('editAfternoonOut');
+const editOvertimeStart = document.getElementById('editOvertimeStart');
+const editOvertimeEnd = document.getElementById('editOvertimeEnd');
+const editTotalDuration = document.getElementById('editTotalDuration');
+let editShiftId = null;
 
     // ---------- AUTH HELPERS ----------
     function getToken() {
@@ -306,11 +320,17 @@ function closeConfirm(result) {
 });
 
         document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = parseInt(this.dataset.id);
-                loadShiftForEdit(id);
-            });
-        });
+    btn.addEventListener('click', function() {
+        const id = parseInt(this.dataset.id);
+        // Find the shift data from the shifts array
+        const shift = shifts.find(s => s.id === id);
+        if (shift) {
+            openEditModal(shift);
+        } else {
+            showAlert('Shift not found.', 'error');
+        }
+    });
+});
     }
 
     // ---------- HELPERS ----------
@@ -425,33 +445,33 @@ function closeConfirm(result) {
         }
     }
 
-    async function loadShiftForEdit(id) {
-        try {
-            const data = await apiFetch(`/shifts/${id}`);
-            const shift = data.shift;
-            if (!shift) return;
+    // async function loadShiftForEdit(id) {
+    //     try {
+    //         const data = await apiFetch(`/shifts/${id}`);
+    //         const shift = data.shift;
+    //         if (!shift) return;
 
-            shiftDate.value = shift.date;
-            morningIn.value = shift.morning_in || '08:00';
-            morningOut.value = shift.morning_out || '12:00';
-            afternoonIn.value = shift.afternoon_in || '13:00';
-            afternoonOut.value = shift.afternoon_out || '17:00';
-            otStart.value = shift.overtime_in || '';
-            otEnd.value = shift.overtime_out || '';
-            calculateDurations();
+    //         shiftDate.value = shift.date;
+    //         morningIn.value = shift.morning_in || '08:00';
+    //         morningOut.value = shift.morning_out || '12:00';
+    //         afternoonIn.value = shift.afternoon_in || '13:00';
+    //         afternoonOut.value = shift.afternoon_out || '17:00';
+    //         otStart.value = shift.overtime_in || '';
+    //         otEnd.value = shift.overtime_out || '';
+    //         calculateDurations();
 
-            shiftForm.onsubmit = async function(e) {
-                e.preventDefault();
-                await updateShift(id);
-                shiftForm.onsubmit = createShift;
-            };
+    //         shiftForm.onsubmit = async function(e) {
+    //             e.preventDefault();
+    //             await updateShift(id);
+    //             shiftForm.onsubmit = createShift;
+    //         };
 
-            shiftForm.scrollIntoView({ behavior: 'smooth' });
+    //         shiftForm.scrollIntoView({ behavior: 'smooth' });
 
-        } catch (error) {
-            showAlert('Failed to load shift: ' + error.message, 'error');
-        }
-    }
+    //     } catch (error) {
+    //         showAlert('Failed to load shift: ' + error.message, 'error');
+    //     }
+    // }
 
     async function updateShift(id) {
         const date = shiftDate.value;
@@ -529,6 +549,101 @@ function closeConfirm(result) {
         const total = mDur + aDur + oDur;
         totalShiftDurationSpan.textContent = total.toFixed(2);
     }
+
+    // ---------- EDIT SHIFT MODAL ----------
+function openEditModal(shift) {
+    editShiftId = shift.id;
+    editDate.value = shift.date;
+    editMorningIn.value = shift.morning_in || '08:00';
+    editMorningOut.value = shift.morning_out || '12:00';
+    editAfternoonIn.value = shift.afternoon_in || '13:00';
+    editAfternoonOut.value = shift.afternoon_out || '17:00';
+    editOvertimeStart.value = shift.overtime_in || '';
+    editOvertimeEnd.value = shift.overtime_out || '';
+    
+    calculateEditDuration();
+    editModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+    editModal.classList.remove('active');
+    document.body.style.overflow = '';
+    editShiftId = null;
+}
+
+function calculateEditDuration() {
+    const mIn = editMorningIn.value;
+    const mOut = editMorningOut.value;
+    const aIn = editAfternoonIn.value;
+    const aOut = editAfternoonOut.value;
+    const otIn = editOvertimeStart.value;
+    const otOut = editOvertimeEnd.value;
+
+    const mDur = calcDuration(mIn, mOut);
+    const aDur = calcDuration(aIn, aOut);
+    
+    let oDur = 0;
+    if (otIn && otOut) {
+        oDur = calcDuration(otIn, otOut);
+    }
+    
+    const total = mDur + aDur + oDur;
+    editTotalDuration.textContent = total.toFixed(2);
+}
+
+async function handleEditSubmit(e) {
+    e.preventDefault();
+    
+    const date = editDate.value;
+    const mIn = editMorningIn.value;
+    const mOut = editMorningOut.value;
+    const aIn = editAfternoonIn.value;
+    const aOut = editAfternoonOut.value;
+    const otIn = editOvertimeStart.value || null;
+    const otOut = editOvertimeEnd.value || null;
+
+    if (!date || !mIn || !mOut || !aIn || !aOut) {
+        showAlert('Please fill in all required fields.', 'warning');
+        return;
+    }
+
+    const mDur = calcDuration(mIn, mOut);
+    const aDur = calcDuration(aIn, aOut);
+    let oDur = 0;
+    if (otIn && otOut) {
+        oDur = calcDuration(otIn, otOut);
+    }
+    const total = mDur + aDur + oDur;
+
+    if (total === 0) {
+        showAlert('Shift duration cannot be zero.', 'warning');
+        return;
+    }
+
+    const payload = {
+        date,
+        morning_in: mIn,
+        morning_out: mOut,
+        afternoon_in: aIn,
+        afternoon_out: aOut,
+        overtime_in: otIn,
+        overtime_out: otOut,
+        total
+    };
+
+    try {
+        await apiFetch(`/shifts/${editShiftId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+        showAlert('Shift updated successfully!', 'success');
+        closeEditModal();
+        loadDashboardData();
+    } catch (error) {
+        showAlert('Failed to update shift: ' + error.message, 'error');
+    }
+}
 
     // ---------- UPDATE TARGET HOURS ----------
     async function updateTarget() {
@@ -631,6 +746,27 @@ function closeConfirm(result) {
         el.addEventListener('change', saveDtrInfo);
         el.addEventListener('input', saveDtrInfo);
     });
+
+    // ---------- EDIT MODAL EVENT LISTENERS ----------
+editModalClose.addEventListener('click', closeEditModal);
+editCancelBtn.addEventListener('click', closeEditModal);
+editModal.addEventListener('click', function(e) {
+    if (e.target === editModal) closeEditModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && editModal.classList.contains('active')) {
+        closeEditModal();
+    }
+});
+
+// Auto-calculate duration on time change
+document.querySelectorAll('#editShiftForm input[type="time"]').forEach(input => {
+    input.addEventListener('change', calculateEditDuration);
+    input.addEventListener('input', calculateEditDuration);
+});
+
+// Form submit
+editShiftForm.addEventListener('submit', handleEditSubmit);
 
     // ---------- EXPORT BUTTONS ----------
     printPdfBtn.addEventListener('click', function() {
